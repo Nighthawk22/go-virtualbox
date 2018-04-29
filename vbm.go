@@ -13,8 +13,10 @@ import (
 )
 
 var (
-	VBM     string // Path to VBoxManage utility.
-	Verbose bool   // Verbose mode.
+	// VBM holds the inferred path to the VBoxManage utility.
+	VBM string
+	// Verbose when set toggle the library in verbose execution mode.
+	Verbose bool
 )
 
 func init() {
@@ -38,12 +40,22 @@ var (
 )
 
 var (
-	ErrMachineExist    = errors.New("machine already exists")
+	// ErrMachineExist holds the error message when the machine already exists.
+	ErrMachineExist = errors.New("machine already exists")
+	// ErrMachineNotExist holds the error message when the machine does not exist.
 	ErrMachineNotExist = errors.New("machine does not exist")
-	ErrVBMNotFound     = errors.New("VBoxManage not found")
+	// ErrVBMNotFound holds the error message when the VBoxManage commands was not found.
+	ErrVBMNotFound = errors.New("VBoxManage not found")
 )
 
-func vbm(args ...string) error {
+type manage struct{}
+
+var (
+	// Manage holds the command to run VBoxManage
+	Manage Command = manage{}
+)
+
+func (manage) run(args ...string) error {
 	cmd := exec.Command(VBM, args...)
 	if Verbose {
 		cmd.Stdout = os.Stdout
@@ -59,7 +71,7 @@ func vbm(args ...string) error {
 	return nil
 }
 
-func vbmOut(args ...string) (string, error) {
+func (manage) runOut(args ...string) (string, error) {
 	cmd := exec.Command(VBM, args...)
 	if Verbose {
 		cmd.Stderr = os.Stderr
@@ -75,7 +87,7 @@ func vbmOut(args ...string) (string, error) {
 	return string(b), err
 }
 
-func vbmOutErr(args ...string) (string, string, error) {
+func (manage) runOutErr(args ...string) (string, string, error) {
 	cmd := exec.Command(VBM, args...)
 	if Verbose {
 		log.Printf("executing: %v %v", VBM, strings.Join(args, " "))
